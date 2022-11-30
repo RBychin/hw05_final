@@ -1,0 +1,40 @@
+{% load user_filters %}
+{% for comment in comments %}
+<div class="card my-4">
+<h7 class="card-header">
+  Автор:
+  <a href="{% url 'posts:profile' comment.author.username %}">
+    {{ comment.author.get_full_name }}
+  </a>
+  <span style="float:right;">
+    <font color="#C0C0C0">
+      {{ comment.pub_date }}
+    </font>
+  </span>
+</h7>
+<div class="card-body">
+  <p>
+    {{ comment.text }}
+    {% if comment.author == user %}
+    <span style="float:right;">
+      <a href="{% url 'posts:comment_delete' comment.id %}">X</a>
+    </span>
+    {% endif %}
+  </p>
+</div>
+</div>
+{% endfor %}
+{% if user.is_authenticated %}
+<div class="card my-4">
+<h7 class="card-header">Добавить комментарий:</h7>
+  <div class="card-body">
+    <form method="post" action="{% url 'posts:add_comment' post.id %}">
+      {% csrf_token %}
+      <div class="form-group mb-2">
+        {{ form.text|addclass:"form-control" }}
+      </div>
+      <button type="submit" class="btn btn-primary">Отправить</button>
+    </form>
+  </div>
+</div>
+{% endif %}

@@ -1,0 +1,51 @@
+{% load thumbnail %}
+<article>
+  <div class="card my-4">
+  <h7 class="card-header">
+  <dd>
+    <span style="float:right;">
+      <font color="#C0C0C0">
+        {{ post.pub_date }}
+      </font>
+    </span>
+    {% if author_flag == 'True' %}
+    <li>
+      Автор:
+      <a href="{%url 'posts:profile' post.author %}">{{ post.author.get_full_name }}</a>
+    </li>
+    {% endif %}
+    {% if group_flag == 'True' %}
+    {% if post.group and group_flag %}
+    <li>
+        Группа:
+        <a href="{% url 'posts:group_list' post.group.slug %}">{{ post.group.title }}</a>
+    </li>
+    {% endif %}
+    {% endif %}
+  </dd>
+  </h7>
+<div class="card-body">
+  {% thumbnail post.image "960x339" crop="center" upscale=True as im %}
+    <img class="card-img my-2" src="{{ im.url }}">
+  <br><br>
+  {% endthumbnail %}
+{{ post.text|linebreaks }}
+</div>
+<h7 class="card-footer">
+  <dt>
+    {% if post.comments.count > 0 %}
+    <dd>
+  <a href="{% url 'posts:post_detail' post.pk %}">Комментарии: {{ post.comments.count }}</a>
+    </dd>
+      {% endif %}
+    <dd>
+    <a href="{% url 'posts:post_detail' post.pk %}">подробная инфомация</a>
+    {% if post.author == user %}
+    <span style="float:right;">
+      <a href="{% url 'posts:post_delete' post.pk %}">Удалить</a>
+    </span>
+    {% endif %}
+    </dd>
+  </dt>
+  </article>
+</h7>

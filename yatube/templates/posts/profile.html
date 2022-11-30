@@ -1,0 +1,14 @@
+{% extends 'base.html' %}
+{% block title %} {{ object_list.first.author.get_full_name }} {% endblock %}
+{% block content %}
+        <h1>Все посты пользователя {{ object_list.first.author.get_full_name }}
+            {% if request.user != object_list.first.author %}
+            <span style="float:right;">{% include 'posts/includes/follow_botton.html' %}</span>
+            {% endif %}
+        </h1>
+        <h6>Всего постов: {{ count }} </h6>
+          {% for post in page_obj %}
+          {% include 'posts/includes/posts_form.html' with group_flag='True' %}
+          {% endfor %}
+      {% include 'posts/includes/paginator.html' %}
+{% endblock %}

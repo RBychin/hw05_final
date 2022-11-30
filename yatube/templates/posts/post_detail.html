@@ -1,0 +1,6 @@
+{% extends 'base.html' %}
+{% block title %} {{ post.text|truncatechars:30 }} {% endblock %}
+{% block content %}
+<h1>Пост автора: {{ post.author.get_full_name }}</h1>
+{% include 'posts/includes/post_detail_post.html' with detail_flag='True' %}
+{% endblock %}
