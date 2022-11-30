@@ -30,6 +30,9 @@ class FollowMixin:
         if self.request.user.is_authenticated:
             context['count_follow'] = Follow.objects.filter(
                 user=self.request.user).count()
+            context['count'] = Post.objects.filter(
+                author__following__user=self.request.user
+            ).count()
         return context
 
     def follows(self, **kwargs):
