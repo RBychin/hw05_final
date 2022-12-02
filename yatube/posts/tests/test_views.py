@@ -168,20 +168,19 @@ class FollowTest(TestCase):
             author=self.user_2
         )
         self.assertTrue(follow_obj.exists())
-        follow_obj.delete()
 
     def test_unfollow_correctly(self):
         Follow.objects.create(
-            user=self.user_2,
-            author=self.user_1
+            user=self.user_1,
+            author=self.user_2
         )
-        self.client_2.get((
+        self.client_1.get((
             reverse('posts:profile_unfollow',
-                    kwargs={'username': self.user_1.username})
+                    kwargs={'username': self.user_2.username})
         ))
         follow_obj = Follow.objects.filter(
-            user=self.user_2,
-            author=self.user_1
+            user=self.user_1,
+            author=self.user_2
         )
         self.assertFalse(follow_obj.exists())
 
