@@ -163,18 +163,27 @@ class FollowTest(TestCase):
             reverse('posts:profile_follow',
                     kwargs={'username': self.user_2.username})
         )
-        self.assertTrue(Follow.objects.filter(
+        follow_obj = Follow.objects.filter(
             user=self.user_1,
-            author=self.user_2).exists())
+            author=self.user_2
+        )
+        self.assertTrue(follow_obj.exists())
+        follow_obj.delete()
 
     def test_unfollow_correctly(self):
-        self.client_1.get((
+        Follow.objects.create(
+            user=self.user_2,
+            author=self.user_1
+        )
+        self.client_2.get((
             reverse('posts:profile_unfollow',
-                    kwargs={'username': self.user_2.username})
+                    kwargs={'username': self.user_1.username})
         ))
-        self.assertFalse(Follow.objects.filter(
-            user=self.user_1,
-            author=self.user_2).exists())
+        follow_obj = Follow.objects.filter(
+            user=self.user_2,
+            author=self.user_1
+        )
+        self.assertFalse(follow_obj.exists())
 
     def test_follow_index_correctly(self):
         """Проверка корректного отображения страницы подписок"""
