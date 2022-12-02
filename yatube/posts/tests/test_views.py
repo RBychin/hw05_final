@@ -157,7 +157,7 @@ class FollowTest(TestCase):
         self.client_1.force_login(self.user_1)
         self.client_2.force_login(self.user_2)
 
-    def test_follow_unfollow_correctly(self):
+    def test_follow_correctly(self):
         """Проверка работы подписок/отписок"""
         self.client_1.get(
             reverse('posts:profile_follow',
@@ -166,6 +166,8 @@ class FollowTest(TestCase):
         self.assertTrue(Follow.objects.filter(
             user=self.user_1,
             author=self.user_2).exists())
+
+    def test_unfollow_correctly(self):
         self.client_1.get((
             reverse('posts:profile_unfollow',
                     kwargs={'username': self.user_2.username})

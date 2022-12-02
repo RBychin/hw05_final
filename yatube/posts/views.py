@@ -36,29 +36,28 @@ class PostGroup(DataMixin, ListView):
     def get_queryset(self):
         group = get_object_or_404(Group, slug=self.kwargs.get('slug'))
         return Post.objects.filter(
-            group__slug=group.slug
+            group=group
         ).select_related('author', 'group').all()
 
 
 class PostProfile(DataMixin, ListView):
     """Страница с постами пользователя."""
     template_name = 'posts/profile.html'
+    author: str
 
     def get_queryset(self):
-        author = get_object_or_404(
+        self.author = get_object_or_404(
             User, username=self.kwargs.get('username'))
         return Post.objects.filter(
-            author__username=author
+            author=self.author
         ).select_related('author', 'group')
 
     def get_context_data(self, *, object_list=None, **kwargs):
         context = super().get_context_data(**kwargs)
-        context['author'] = author = get_object_or_404(User,
-                                                       username=self.kwargs[
-                                                           'username'])
+        context['author'] = self.author
         if self.request.user.is_authenticated:
             context['following'] = Follow.objects.filter(
-                user=self.request.user, author=author
+                user=self.request.user, author=self.author
             ).exists()
         return context
 
