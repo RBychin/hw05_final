@@ -65,9 +65,6 @@ class Post(CreatedModel):
         verbose_name = 'Пост'
         verbose_name_plural = 'Посты'
 
-    # def get_absolute_url(self):
-    #     return reverse('post-detail', args=[str(self.pk)])
-
 
 class Comment(CreatedModel):
     text = models.TextField(

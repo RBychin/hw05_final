@@ -3,7 +3,10 @@
 {% block content %}
       {% include 'posts/includes/switcher.html' %}
       <h1>Последние обновления на сайте.</h1>
-      <h6>Всего постов: {{ object_list.count }}</h6>
+      <h6>Всего постов: {{ page_obj.paginator.count }}</h6>
+      {% if page_obj.paginator.count == 0 %}
+        {% include 'posts/includes/empty_page.html' %}
+      {% endif %}
       {% for post in page_obj %}
         {% include 'posts/includes/posts_form.html' with all_posts_flag='True' group_flag='True' author_flag='True' %}
       {% endfor %}

@@ -24,11 +24,6 @@ urlpatterns = [
     path('posts/<int:post_id>/comment/',
          views.PostCommentAdd.as_view(),
          name='add_comment'),
-    path('posts/<int:post_id>/delete/', views.PostDelete.as_view(),
-         name='post_delete'),
-    path('posts/com/<int:comment_id>/delete/',
-         views.CommentDelete.as_view(),
-         name='comment_delete'),
     path('follow/', views.FollowIndex.as_view(),
          name='follow_index'),
     path(

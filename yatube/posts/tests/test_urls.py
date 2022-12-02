@@ -66,13 +66,28 @@ class TaskURLTests(TestCase):
                 self.assertEqual(response.status_code, HTTPStatus.FOUND)
 
     def test_redirects_guest(self):
-        """Тест проверки редиректов posts:create_post, post_edit для
+        """Тест проверки редиректов create_post, post_edit, follow,
+         unfollow, follow_index, add_comment для
         гостевого клиента."""
         expected_data = {
             '/auth/login/?next=/create/': reverse('posts:post_create'),
             f'/auth/login/?next=/posts/{self.post.pk}/edit/':
-                reverse('posts:post_edit',
-                        kwargs={'post_id': self.post.pk})
+                reverse(
+                    'posts:post_edit', kwargs={'post_id': self.post.pk}),
+            '/auth/login/?next=/follow/': reverse('posts:follow_index'),
+            f'/auth/login/?next=/profile/{self.user.username}/follow/':
+                reverse(
+                'posts:profile_follow',
+                    kwargs={'username': self.user.username}
+            ),
+            f'/auth/login/?next=/profile/{self.user.username}/unfollow/':
+                reverse(
+                'posts:profile_unfollow',
+                kwargs={'username': self.user.username}
+            ),
+            f'/auth/login/?next=/posts/{self.post.pk}/comment/': reverse(
+                'posts:add_comment', kwargs={'post_id': self.post.pk}
+            )
         }
         for redirect, url in expected_data.items():
             with self.subTest(redirect=redirect):

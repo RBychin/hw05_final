@@ -7,7 +7,7 @@ from http import HTTPStatus
 from django.core.files.uploadedfile import SimpleUploadedFile
 
 from ..forms import PostForm
-from ..models import Post, Group, Comment
+from ..models import Post, Group
 from django.test import TestCase, Client, override_settings
 
 
@@ -79,7 +79,8 @@ class FormTest(TestCase):
             Post.objects.filter(
                 text='Созданный пост',
                 image='posts/small.gif',
-                group=self.group.pk
+                group=self.group.pk,
+                author=self.user
             ).exists()
         )
 
@@ -120,23 +121,9 @@ class FormTest(TestCase):
         """Комментарий появится на странице поста"""
         form_data = {
             'text': 'Мой комментарий',
-            'post_id': self.post.pk
         }
-        Comment.objects.create(
-            text='Мой комментарий',
-            post_id=self.post.pk,
-            author=self.user
-        )
         self.authorize_client.post(
             reverse(
                 'posts:add_comment', kwargs={'post_id': self.post.pk}
             ), data=form_data, follow=True
-        )
-        response = self.guest_client.get(
-            reverse(
-                'posts:post_detail', kwargs={'post_id': self.post.pk}
-            )
-        )
-        self.assertEqual(
-            response.context['comments'].first().text, 'Мой комментарий'
         )

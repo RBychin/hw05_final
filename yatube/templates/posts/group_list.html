@@ -3,10 +3,15 @@
 {{ group.title }}
 {% endblock %}
 {% block content %}
-      <h1>{{ group.title }}</h1>
-      <p>{{ group.description }}</p>
-      <h6>Найдено {{  count  }} записей.</h6>
-      {% for post in object_list %}
+{% with page_obj|first as post %}
+      <h1>{{ post.group.title }}</h1>
+      <p>{{ post.group.description }}</p>
+{% endwith %}
+      <h6>Найдено {{  page_obj.paginator.count  }} записей.</h6>
+      {% if page_obj.paginator.count == 0 %}
+        {% include 'posts/includes/empty_page.html' %}
+      {% endif %}
+      {% for post in page_obj %}
       {% include 'posts/includes/posts_form.html' with author_flag='True' %}
       {% endfor %}
       {% include 'posts/includes/paginator.html' %}

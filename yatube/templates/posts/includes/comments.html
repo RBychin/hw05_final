@@ -15,11 +15,6 @@
 <div class="card-body">
   <p>
     {{ comment.text }}
-    {% if comment.author == user %}
-    <span style="float:right;">
-      <a href="{% url 'posts:comment_delete' comment.id %}">X</a>
-    </span>
-    {% endif %}
   </p>
 </div>
 </div>

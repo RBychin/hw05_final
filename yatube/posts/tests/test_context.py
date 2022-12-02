@@ -6,7 +6,7 @@ from django.core.cache import cache
 from django.core.files.uploadedfile import SimpleUploadedFile
 from django.contrib.auth import get_user_model
 from django.test import Client, TestCase, override_settings
-from ..models import Group, Post
+from ..models import Group, Post, Comment
 from django.urls import reverse
 from django import forms
 
@@ -63,6 +63,11 @@ class TestContext(TestCase):
             )
         ])
         cls.post = Post.objects.get(author=cls.user)
+        Comment.objects.create(
+            text='Мой комментарий',
+            author=cls.user,
+            post_id=cls.post.pk
+        )
 
     @classmethod
     def tearDownClass(cls):
@@ -105,11 +110,6 @@ class TestContext(TestCase):
                 self.assertEqual(
                     response.context['object_list'].count(),
                     posts_count)
-                self.assertEqual(
-                    response.context['count'],
-                    posts_count,
-                    'В контекст не верно передано общее количество постов.'
-                )
                 self.assertIsNotNone(
                     response.context['object_list'][index].image,
                     'Картинка не найдена')
@@ -178,3 +178,13 @@ class TestContext(TestCase):
         )
         response_content_third = response_third.content
         self.assertNotEqual(response_content_second, response_content_third)
+
+    def test_comment_context(self):
+        response = self.rbychin.get(
+            reverse(
+                'posts:post_detail', kwargs={'post_id': self.post.pk}
+            )
+        )
+        self.assertEqual(
+            response.context['comments'].first().text, 'Мой комментарий'
+        )

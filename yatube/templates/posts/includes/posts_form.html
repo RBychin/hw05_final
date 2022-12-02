@@ -40,11 +40,6 @@
       {% endif %}
     <dd>
     <a href="{% url 'posts:post_detail' post.pk %}">подробная инфомация</a>
-    {% if post.author == user %}
-    <span style="float:right;">
-      <a href="{% url 'posts:post_delete' post.pk %}">Удалить</a>
-    </span>
-    {% endif %}
     </dd>
   </dt>
   </article>

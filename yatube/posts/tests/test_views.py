@@ -3,7 +3,7 @@ from django.core.cache import cache
 from django.contrib.auth import get_user_model
 from django.test import Client, TestCase
 from django.urls import reverse
-from ..models import Post, Group
+from ..models import Post, Group, Follow, Comment
 
 User = get_user_model()
 
@@ -54,6 +54,8 @@ class PostTest(TestCase):
         self.guest_client = Client()
         self.authorize_client = Client()
         self.authorize_client.force_login(self.user)
+        self.authorize_client_another = Client()
+        self.authorize_client_another.force_login(self.another_author)
 
     def test_correct_HTML_templates(self):
         """Проверка корректности шаблонов и адресов."""
@@ -132,3 +134,86 @@ class PostTest(TestCase):
             post, response.context['page_obj'],
             f'Пост "{post.text}", должен находиться в группе '
             f'{self.another_group}, а находится в {self.group}')
+
+
+class FollowTest(TestCase):
+    @classmethod
+    def setUpClass(cls):
+        super().setUpClass()
+        cls.user_1 = User.objects.create_user(username='user1')
+        cls.user_2 = User.objects.create_user(username='user2')
+        cls.post = Post.objects.create(
+            text='Тестовый пост 1',
+            author=cls.user_2
+        )
+        cls.post_2 = Post.objects.create(
+            text='Тестовый пост 2',
+            author=cls.user_1
+        )
+
+    def setUp(self) -> None:
+        self.client_1 = Client()
+        self.client_2 = Client()
+        self.client_1.force_login(self.user_1)
+        self.client_2.force_login(self.user_2)
+
+    def test_follow_unfollow_correctly(self):
+        """Проверка работы подписок/отписок"""
+        self.client_1.get(
+            reverse('posts:profile_follow',
+                    kwargs={'username': self.user_2.username})
+        )
+        self.assertTrue(Follow.objects.filter(
+            user=self.user_1,
+            author=self.user_2).exists())
+        self.client_1.get((
+            reverse('posts:profile_unfollow',
+                    kwargs={'username': self.user_2.username})
+        ))
+        self.assertFalse(Follow.objects.filter(
+            user=self.user_1,
+            author=self.user_2).exists())
+
+    def test_follow_index_correctly(self):
+        """Проверка корректного отображения страницы подписок"""
+        Follow.objects.create(
+            user=self.user_1,
+            author=self.user_2
+        )
+        response = self.client_1.get(reverse('posts:follow_index'))
+        self.assertIn(self.post, response.context['page_obj'])
+        self.assertNotIn(self.post_2, response.context['page_obj'])
+
+
+class TestComment(TestCase):
+    @classmethod
+    def setUpClass(cls):
+        super().setUpClass()
+        cls.user = User.objects.create_user(username='ClintEastwood')
+        Post.objects.bulk_create([
+            Post(text='Пост 1',
+                 author=cls.user),
+            Post(text='Пост 2',
+                 author=cls.user)
+        ])
+        cls.post_1, cls.post_2 = Post.objects.get(pk=1), Post.objects.get(pk=2)
+
+    def setUp(self) -> None:
+        self.client = Client()
+        self.client.force_login(self.user)
+
+    def test_comment_correctly(self):
+        """комментарий отображается на нужной странице поста"""
+        self.comment = Comment.objects.create(
+            text='коммент',
+            author=self.user,
+            post_id=self.post_1.pk
+        )
+        response = self.client.get(
+            reverse('posts:post_detail', kwargs={'post_id': self.post_1.pk})
+        )
+        self.assertIn(self.comment, response.context['comments'])
+        response = self.client.get(
+            reverse('posts:post_detail', kwargs={'post_id': self.post_2.pk})
+        )
+        self.assertNotIn(self.comment, response.context['comments'])

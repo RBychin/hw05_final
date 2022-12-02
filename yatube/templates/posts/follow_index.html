@@ -3,7 +3,7 @@
 {% block content %}
       {% include 'posts/includes/switcher.html' %}
       <h1>Авторов в подписках: {{ count_follow }}</h1>
-      <h6>Всего постов: {{ count }}</h6>
+      <h6>Всего постов: {{ page_obj.paginator.count }}</h6>
       {% for post in page_obj %}
         {% include 'posts/includes/posts_form.html' with all_posts_flag='True' group_flag='True' author_flag='True' %}
       {% endfor %}
