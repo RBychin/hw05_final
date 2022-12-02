@@ -4,7 +4,7 @@ from django.views.decorators.cache import cache_page
 
 app_name = 'posts'
 
-CACHE_SEC = 20
+CACHE_SEC = 0
 
 urlpatterns = [
     path('', cache_page(CACHE_SEC)(views.PostIndex.as_view()),
