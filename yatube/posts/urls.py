@@ -4,7 +4,7 @@ from django.views.decorators.cache import cache_page
 
 app_name = 'posts'
 
-CACHE_SEC = 20
+CACHE_SEC = 0
 
 urlpatterns = [
     path('', cache_page(CACHE_SEC)(views.PostIndex.as_view()),
@@ -36,4 +36,10 @@ urlpatterns = [
         views.ProfileUnfollow.as_view(),
         name='profile_unfollow'
     ),
+    path('posts/<int:post_id>/delete/', views.PostDelete.as_view(),
+         name='post_delete'),
+    path('posts/com/<int:comment_id>/delete/',
+         views.CommentDelete.as_view(),
+         name='comment_delete'),
+    path('search/', views.PostTextSearch.as_view(), name='search')
 ]

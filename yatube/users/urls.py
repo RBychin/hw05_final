@@ -7,6 +7,8 @@ from django.contrib.auth.views import (
     PasswordResetConfirmView,
     PasswordChangeView
 )
+from django.views.generic import TemplateView
+from .views import UserEditor
 from django.urls import path
 from . import views
 
@@ -67,4 +69,16 @@ urlpatterns = [
         ),
         name='password_change_done'
     ),
+    path('info/', TemplateView.as_view(
+        template_name='users/includes/info_last.html',
+    ),
+         name='info_last'
+         ),
+    path('user/edit/', UserEditor.as_view(), name='user_edit'),
+    path('info/comments/', TemplateView.as_view(
+        template_name='users/includes/info_comments.html'
+    ), name='info_comments'),
+    path('info/posts/', TemplateView.as_view(
+        template_name='users/includes/info_posts.html'
+    ), name='info_posts'),
 ]

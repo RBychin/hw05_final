@@ -83,7 +83,7 @@ class Comment(CreatedModel):
     )
 
     def __str__(self):
-        return self.text[:15]
+        return self.text[:60]
 
     class Meta:
         ordering = ["-pub_date"]

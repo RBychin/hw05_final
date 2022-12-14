@@ -10,28 +10,64 @@
     {% if post.group %}
     <li class="list-group-item">
       Группа:
-      <a href="{% url 'posts:group_list' post.group.slug %}">{{ post.group.title }}</a>
+      <a class="link-secondary" href="{% url 'posts:group_list' post.group.slug %}">{{ post.group.title }}</a>
     </li>
     {% endif %}
     <li class="list-group-item">
-      Автор: <a href="{% url 'posts:profile' post.author %}">{{ post.author.get_full_name }}</a>
+      Автор: <a class="link-secondary" href="{% url 'posts:profile' post.author %}">{{ post.author.get_full_name }}</a>
     </li>
     <li class="list-group-item d-flex justify-content-between align-items-center">
-      Всего постов автора: {{ count }}
+      Всего постов автора: {{ post.author.posts.count }}
     </li>
     <li class="list-group-item">
-      <a href="{% url 'posts:profile' post.author %}">
+      <a class="link-secondary" href="{% url 'posts:profile' post.author %}">
         все посты пользователя
       </a>
     </li>
-  </dd>
 </div>
+  </dd>
+  {% if post.author.following.all %}
+  <div class="card my-4">
+    <dd class="list-group list-group-flush">
+      <li class="card-header">
+        Подписчики ({{ post.author.following.count }}):
+      </li>
+      {% for i in post.author.following.all %}
+      <li class="list-group-item">
+        <a class="link-secondary" href="{% url 'posts:profile' i.user %}">
+          {% if not i.user.get_full_name %}
+          {{ i.user.username }}
+          {% else %}
+          {{ i.user.get_full_name }}
+          {% endif %}
+        </a>
+      </li>
+      {% endfor %}
+    </dd>
+  </div>
+  {% endif %}
 {% if post.author == user %}
-<a class="btn btn-primary" href="{% url 'posts:post_edit' post.pk %}">
+<a class="btn btn-secondary" href="{% url 'posts:post_edit' post.pk %}">
   редактировать запись
 </a>
+<a class="btn btn-secondary" href="{% url 'posts:post_delete' post.pk %}">
+  Удалить
+</a></p>
 <hr>
 {%endif %}
+{% if request.user != post.author %}
+  {% if following %}
+    <a class="btn btn-lg btn-light"
+      href="{% url 'posts:profile_unfollow' post.author.username %}" role="button">
+      Отписаться
+    </a>
+  {% else %}
+      <a class="btn btn-lg btn-secondary"
+        href="{% url 'posts:profile_follow' post.author.username %}" role="button">
+        Подписаться
+      </a>
+   {% endif %}
+{% endif %}
 </aside>
 
 

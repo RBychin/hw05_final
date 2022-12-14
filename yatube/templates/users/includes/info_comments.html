@@ -1,0 +1,25 @@
+{% extends 'users/user_info.html' %}
+{% block header %}
+Последние комментарии
+{% endblock %}
+{% block user %}
+{% if user.comments.count == 0 %}
+Вы не оставили еще ни одного комментария :(
+{% else %}
+{% for comment in user.comments.all|slice:':5' %}
+<div class="card my-4">
+<dd class="list-group list-group-flush">
+    <li class="card-header">
+        <a class="link-secondary" href="{% url 'posts:post_detail' comment.post.id %}"> {{ comment.post.text|slice:':250' }} </a>
+    </li>
+    <li class="list-group-item">
+        <span class="figure-caption text-muted" style="float: right">
+            {{ comment.pub_date }}
+        </span>
+      {{ comment }}
+    </li>
+</dd>
+</div>
+{% endfor %}
+{% endif %}
+{% endblock %}

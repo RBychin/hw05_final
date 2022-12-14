@@ -1,5 +1,5 @@
 from django.shortcuts import get_object_or_404, redirect
-from .models import Post, Group, User, Follow
+from .models import Post, Group, User, Follow, Comment
 from django.contrib.auth.mixins import LoginRequiredMixin
 from .forms import PostForm, CommentForm
 from django.urls import reverse
@@ -73,9 +73,11 @@ class PostDetail(DetailView):
             Post, pk=self.kwargs['post_id'])
         context = {
             'form': CommentForm(self.request.POST or None),
-            'comments': post.comments.all().select_related('author', 'post'),
+            'comments': post.comments.all().select_related('author',),
             'post': post,
-            'count': Post.objects.filter(author=post.author).count()
+            'following': Follow.objects.filter(
+                user=self.request.user, author=post.author
+            ).exists() if self.request.user.is_authenticated else False
         }
         return context
 
@@ -113,7 +115,6 @@ class PostEdit(LoginRequiredMixin, UpdateView):
                                )
         if form.is_valid() and request.user == post.author:
             obj = form.save(commit=False)
-            obj.author = self.request.user
             obj.save()
         return redirect(
             'posts:post_detail', kwargs.get('post_id')
@@ -135,6 +136,9 @@ class PostCommentAdd(LoginRequiredMixin, FormView):
         comment.save()
         return redirect('posts:post_detail', post_id=self.kwargs['post_id'])
 
+    def get(self, request, *args, **kwargs):
+        return redirect('posts:post_detail', post_id=self.kwargs['post_id'])
+
 
 class FollowIndex(LoginRequiredMixin, DataMixin, ListView):
     template_name = 'posts/follow_index.html'
@@ -151,10 +155,7 @@ class ProfileFollow(LoginRequiredMixin, View):
         is_follower = Follow.objects.filter(user=user, author=author)
         if user != author and not is_follower.exists():
             Follow.objects.create(user=user, author=author)
-        return redirect(reverse(
-            'posts:profile',
-            args=(username,)
-        ))
+        return redirect(request.META.get('HTTP_REFERER'))
 
 
 class ProfileUnfollow(LoginRequiredMixin, View):
@@ -162,7 +163,39 @@ class ProfileUnfollow(LoginRequiredMixin, View):
         author = get_object_or_404(User, username=username)
         is_follower = Follow.objects.filter(user=request.user, author=author)
         is_follower.delete()
-        return redirect(reverse(
-            'posts:profile',
-            args=(username,)
-        ))
+        return redirect(request.META.get('HTTP_REFERER'))
+
+
+class PostDelete(View):
+    def get(self, request, post_id):
+        post = Post.objects.get(id=post_id)
+        if post.author != request.user:
+            return redirect(request.META.get('HTTP_REFERER'))
+        post.delete()
+        return redirect(request.META.get('HTTP_REFERER'))
+
+
+class CommentDelete(View):
+    def get(self, request, comment_id):
+        """Функция удаления комментария."""
+        comment = Comment.objects.get(id=comment_id)
+        if comment.author != request.user:
+            return redirect(request.META.get('HTTP_REFERER'))
+        comment.delete()
+        return redirect(request.META.get('HTTP_REFERER'))
+
+
+class PostTextSearch(DataMixin, ListView):
+    template_name = 'posts/search.html'
+
+    def get_queryset(self):
+        return Post.objects.filter(text__contains=self.get_object())
+
+    def get_context_data(self, *, object_list=None, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['search'] = self.get_object()
+        return context
+
+    def get_object(self):
+        search_query = self.request.GET.get('search', )
+        return search_query

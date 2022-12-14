@@ -1,0 +1,104 @@
+{% extends 'base.html' %}
+{% block content %}
+<div class="row">
+<aside class="col-12 col-md-3">
+<div class="card my-4">
+  <dd class="list-group list-group-flush">
+    <li class="card-header">
+      Информация
+      <span style="float:right;">
+        <a class="link-secondary" href="{% url 'users:user_edit' %}">Ред.</a>
+      </span>
+    </li>
+    <li class="list-group-item">
+      <span class="text-muted">Имя:</span> {{ user.get_full_name }}
+    </li>
+    <li class="list-group-item">
+      <span class="text-muted">E-mail:</span> {{ user.email }}
+    </li>
+    <li class="list-group-item">
+      <span class="text-muted">Имя пользователя:</span> {{ user.username }}
+    </li>
+    <li class="list-group-item">
+      <span class="text-muted">Дата регистрации:</span> {{ user.date_joined|date:'j M Y' }}
+    </li>
+  </dd>
+</div>
+
+<div class="card my-4">
+  <dd class="list-group list-group-flush">
+    <li class="card-header">
+        Контент
+    </li>
+    <li class="list-group-item">
+      <span class="text-muted">Посты:</span>
+      <a class="link-secondary" href="{% url 'users:info_posts' %}">{{ user.posts.count }}</a>
+    </li>
+    <li class="list-group-item">
+      <span class="text-muted">Комментарии:</span>
+      <a class="link-secondary" href="{% url 'users:info_comments' %}">{{ user.comments.count }}</a>
+    </li>
+  </dd>
+</div>
+  {% if user.following.all %}
+  <div class="card my-4">
+    <dd class="list-group list-group-flush">
+      <li class="card-header">
+        Подписчики ({{ user.following.count }}):
+      </li>
+      {% for i in user.following.all %}
+      <li class="list-group-item">
+        <a class="link-secondary" href="{% url 'posts:profile' i.user %}">
+          {% if not i.user.get_full_name %}
+          {{ i.user.username }}
+          {% else %}
+          {{ i.user.get_full_name }}
+          {% endif %}
+        </a>
+      </li>
+      {% endfor %}
+    </dd>
+  </div>
+    {% endif %}
+    {% if user.follower.all %}
+  <div class="card my-4">
+    <dd class="list-group list-group-flush">
+      <li class="card-header">
+        Мои подписки ({{ user.follower.count }}):
+      </li>
+      {% for i in user.follower.all %}
+      <li class="list-group-item">
+        <a class="link-secondary" href="{% url 'posts:profile' i.user %}">
+          {% if not i.author.get_full_name %}
+          {{ i.author.username }}
+          {% else %}
+          {{ i.author.get_full_name }}
+          {% endif %}
+        </a>
+          <span style="float:right;">
+            <a href="{% url 'posts:profile_unfollow' i.author.username %}" type="button" class="btn-close" aria-label="Close"></a>
+          </span>
+      </li>
+      {% endfor %}
+    </dd>
+  </div>
+    {% endif %}
+<hr>
+</aside>
+
+  <article class="col-12 col-md-9">
+    <div class="card my-4">
+      <h7 class="card-header">
+        {% block header %}
+        HEADER
+        {% endblock %}
+      </h7>
+      <div class="card-body">
+       {% block user %}
+        BLOCK
+        {% endblock %}
+      </div>
+    </div>
+  </article>
+</div>
+{% endblock %}

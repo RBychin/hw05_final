@@ -1,0 +1,30 @@
+{% extends 'users/user_info.html' %}
+{% load thumbnail %}
+{% block header %}
+Последние посты
+{% endblock %}
+{% block user %}
+{% for post in user.posts.all|slice:':4' %}
+<div class="card mb-3">
+  <div class="row g-0">
+    <div class="col-md-4">
+        {% thumbnail post.image "960x670" crop="center" as im %}
+      <a href="{% url 'posts:post_detail' post.id %}">
+      <img src="{{ im.url }}" class="img-fluid rounded-start" alt="...">
+        </a>
+        {% endthumbnail %}
+    </div>
+    <div class="col-md-8">
+      <div class="card-body">
+        <h5 class="card-title">{{ post.group }}</h5>
+        <p class="card-text"><a class="text-muted" href="{% url 'posts:post_detail' post.id %}">{{ post.text|slice:':200' }}</a></p>
+        <p class="card-text"><small class="text-muted">{{ post.pub_date }}</small></p>
+          {% if post.comments.count > 0 %}
+        <p class="card-text"><small class="text-muted"><a class="text-muted" href="{% url 'posts:post_detail' post.id %}">Комментарии: {{ post.comments.count }}</a></small></p>
+          {% endif %}
+      </div>
+    </div>
+  </div>
+</div>
+{% endfor %}
+{% endblock %}

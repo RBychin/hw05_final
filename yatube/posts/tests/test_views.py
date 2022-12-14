@@ -158,7 +158,7 @@ class FollowTest(TestCase):
         self.client_2.force_login(self.user_2)
 
     def test_follow_correctly(self):
-        """Проверка работы подписок/отписок"""
+        """Проверка работы подписок"""
         self.client_1.get(
             reverse('posts:profile_follow',
                     kwargs={'username': self.user_2.username})
