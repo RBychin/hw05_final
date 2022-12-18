@@ -8,7 +8,24 @@
         {% include 'posts/includes/empty_page.html' %}
       {% endif %}
         {% if user.is_authenticated %}
-            <div class="d-grid gap-2"><a type="button" href="{% url 'posts:post_create' %}" class="btn btn-outline-dark">Новый пост</a></div>
+
+
+
+
+<p>
+  <div class="d-grid gap-2">
+    <a class="btn btn-outline-dark" data-bs-toggle="collapse" href="#collapseExample" role="button" aria-expanded="false" aria-controls="collapseExample">
+      Новый пост
+    </a>
+  </div>
+</p>
+<div class="collapse" id="collapseExample">
+  <div class="card card-body">
+      {% include 'posts/includes/create_post.html' %}
+  </div>
+</div>
+
+
         {% endif %}
       {% for post in page_obj %}
         {% include 'posts/includes/posts_form.html' with all_posts_flag='True' group_flag='True' author_flag='True' %}

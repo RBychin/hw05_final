@@ -1,4 +1,5 @@
 {% load user_filters %}
+{% load humanize %}
 <div class="card my-4">
 <h7 class="card-header">Комментарии:</h7>
   <div class="card-body">
@@ -6,13 +7,17 @@
 <div class="input-group mb-3">
   <div class="input-group-text">
     <a class="link-secondary" href="{% url 'posts:profile' comment.author.username %}">
-    {{ comment.author.get_full_name }}
+      {% if comment.author.first_name %}
+    {{ comment.author.first_name }} {{ comment.author.last_name|slice:':1' }}
+      {% else %}
+      {{ comment.author.username }}
+      {% endif %}
     </a>
   </div>
   <div class="form-control">
     {{ comment.text }}
     <span class="small text-muted" style="float: right">
-      {{ comment.pub_date }}
+      {{ comment.pub_date|naturalday }} в {{ comment.pub_date|date:'H:m' }}
       {% if comment.author == user %}
       <a href="{% url 'posts:comment_delete' comment.pk %}" type="button" class="btn-close" aria-label="Close"></a>
     {% endif %}
@@ -24,7 +29,7 @@
     <form method="post" action="{% url 'posts:add_comment' post.id %}">
       {% csrf_token %}
       <div class="form-group mb-2">
-        {{ form.text|addclass:"form-control" }}
+        {{ comments_form.text|addclass:"form-control" }}
       </div>
       <button type="submit" class="btn btn-secondary">Отправить</button>
     </form>

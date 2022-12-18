@@ -1,13 +1,13 @@
 from django.urls import path
 from . import views
-from django.views.decorators.cache import cache_page
+
 
 app_name = 'posts'
 
 CACHE_SEC = 0
 
 urlpatterns = [
-    path('', cache_page(CACHE_SEC)(views.PostIndex.as_view()),
+    path('', views.PostIndex.as_view(),
          name='index'),
     path('group/<slug:slug>/',
          views.PostGroup.as_view(),
@@ -19,8 +19,6 @@ urlpatterns = [
          name='post_detail'),
     path('create/', views.PostCreate.as_view(),
          name='post_create'),
-    path('posts/<int:post_id>/edit/', views.PostEdit.as_view(),
-         name='post_edit'),
     path('posts/<int:post_id>/comment/',
          views.PostCommentAdd.as_view(),
          name='add_comment'),
@@ -35,6 +33,16 @@ urlpatterns = [
         'profile/<str:username>/unfollow/',
         views.ProfileUnfollow.as_view(),
         name='profile_unfollow'
+    ),
+    path(
+        'posts/<int:post_id>/like/',
+        views.LikePost.as_view(),
+        name='post_like'
+    ),
+    path(
+        'posts/<int:post_id>/unlike/',
+        views.UnlikePost.as_view(),
+        name='post_unlike'
     ),
     path('posts/<int:post_id>/delete/', views.PostDelete.as_view(),
          name='post_delete'),

@@ -1,5 +1,7 @@
+from datetime import datetime
+
 from django.shortcuts import get_object_or_404, redirect
-from .models import Post, Group, User, Follow, Comment
+from .models import Post, Group, User, Follow, Comment, Like
 from django.contrib.auth.mixins import LoginRequiredMixin
 from .forms import PostForm, CommentForm
 from django.urls import reverse
@@ -27,6 +29,22 @@ class PostIndex(DataMixin, ListView):
 
     def get_queryset(self):
         return Post.objects.select_related('author', 'group')
+
+    def get_context_data(self, *, object_list=None, **kwargs):
+        context = super(PostIndex, self).get_context_data(**kwargs)
+        context['form'] = PostForm
+        return context
+
+    def post(self, request):
+        form = PostForm(request.POST or None,
+                        files=request.FILES or None,
+                        )
+        if form.is_valid():
+            obj = form.save(commit=False)
+            obj.author = self.request.user
+            obj.save()
+        return redirect(
+            'posts:profile', request.user)
 
 
 class PostGroup(DataMixin, ListView):
@@ -72,14 +90,31 @@ class PostDetail(DetailView):
         post = get_object_or_404(
             Post, pk=self.kwargs['post_id'])
         context = {
-            'form': CommentForm(self.request.POST or None),
-            'comments': post.comments.all().select_related('author',),
+            'form': PostForm(self.request.POST or None,
+                             files=self.request.FILES or None,
+                             instance=post),
+            'comments_form': CommentForm(self.request.POST or None),
+            'comments': post.comments.all().select_related('author', ),
             'post': post,
             'following': Follow.objects.filter(
                 user=self.request.user, author=post.author
             ).exists() if self.request.user.is_authenticated else False
         }
         return context
+
+    def post(self, request, *args, **kwargs):
+        post = self.get_object()
+        form = PostForm(request.POST or None,
+                        files=request.FILES or None,
+                        instance=post
+                        )
+        if form.is_valid() and request.user == post.author:
+            obj = form.save(commit=False)
+            obj.edit_date = datetime.now()
+            obj.save()
+        return redirect(
+            'posts:post_detail', kwargs.get('post_id')
+        )
 
 
 class PostCreate(LoginRequiredMixin, CreateView):
@@ -93,37 +128,9 @@ class PostCreate(LoginRequiredMixin, CreateView):
         obj.save()
         return redirect('posts:profile', self.request.user)
 
-
-class PostEdit(LoginRequiredMixin, UpdateView):
-    """Страница редактирования поста."""
-    form_class = PostForm
-    template_name = 'posts/create_post.html'
-    extra_context = {'is_edit': True}
-
-    def get(self, request, **kwargs):
-        if self.get_object().author != request.user:
-            return redirect(
-                'posts:post_detail', kwargs.get('post_id')
-            )
-        return super().get(request, **kwargs)
-
-    def post(self, request, *args, **kwargs):
-        post = self.get_object()
-        form = self.form_class(request.POST or None,
-                               files=request.FILES or None,
-                               instance=post
-                               )
-        if form.is_valid() and request.user == post.author:
-            obj = form.save(commit=False)
-            obj.save()
-        return redirect(
-            'posts:post_detail', kwargs.get('post_id')
-        )
-
     def get_object(self, queryset=None):
         post = get_object_or_404(Post, pk=self.kwargs['post_id'])
         return post
-
 
 class PostCommentAdd(LoginRequiredMixin, FormView):
     """Форма добавления комментария."""
@@ -199,3 +206,22 @@ class PostTextSearch(DataMixin, ListView):
     def get_object(self):
         search_query = self.request.GET.get('search', )
         return search_query
+
+
+class LikePost(LoginRequiredMixin, View):
+    def get(self, request, post_id):
+        user = request.user
+        post = get_object_or_404(Post, pk=post_id)
+        is_liked = Like.objects.filter(user=user, post=post)
+        if not is_liked.exists():
+            Like.objects.create(user=user, post=post)
+        return redirect(request.META.get('HTTP_REFERER'))
+
+
+class UnlikePost(LoginRequiredMixin, View):
+    def get(self, request, post_id):
+        user = request.user
+        post = get_object_or_404(Post, pk=post_id)
+        is_liked = Like.objects.filter(user=user, post=post)
+        is_liked.delete()
+        return redirect(request.META.get('HTTP_REFERER'))

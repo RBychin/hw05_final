@@ -2,6 +2,7 @@ from django.db import models
 from django.contrib.auth import get_user_model
 from core.models import CreatedModel
 from django.urls import reverse
+from embed_video.fields import EmbedVideoField
 
 User = get_user_model()
 
@@ -35,7 +36,7 @@ class Post(CreatedModel):
     objects = None
     text = models.TextField(
         verbose_name='Пост',
-        help_text='Введите текст вашего сообщения.'
+        help_text='Введите текст вашего сообщения.',
     )
     author = models.ForeignKey(
         User,
@@ -55,6 +56,17 @@ class Post(CreatedModel):
         upload_to='posts/',
         blank=True,
         help_text='Загрузите картинку'
+    )
+    video = EmbedVideoField(
+        blank=True,
+        null=True,
+        help_text='Вставьте ссылку на видео',
+        verbose_name='Видео'
+    )
+    edit_date = models.DateTimeField(
+        'Дата редактирования',
+        blank=True,
+        null=True
     )
 
     def __str__(self):
@@ -89,7 +101,7 @@ class Comment(CreatedModel):
         ordering = ["-pub_date"]
 
 
-class Follow(models.Model):
+class Follow(CreatedModel):
     user = models.ForeignKey(
         User,
         on_delete=models.CASCADE,
@@ -99,4 +111,17 @@ class Follow(models.Model):
         User,
         on_delete=models.CASCADE,
         related_name='following'
+    )
+
+
+class Like(CreatedModel):
+    user = models.ForeignKey(
+        User,
+        on_delete=models.CASCADE,
+        related_name='likes'
+    )
+    post = models.ForeignKey(
+        Post,
+        on_delete=models.CASCADE,
+        related_name='likes'
     )

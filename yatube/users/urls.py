@@ -69,11 +69,12 @@ urlpatterns = [
         ),
         name='password_change_done'
     ),
-    path('info/', TemplateView.as_view(
-        template_name='users/includes/info_last.html',
-    ),
-         name='info_last'
-         ),
+    # path('info/', TemplateView.as_view(
+    #     template_name='users/includes/info_last.html',
+    # ),
+    #      name='info_last'
+    #      ),
+    path('info/', views.UserInfo.as_view(), name='info_last'),
     path('user/edit/', UserEditor.as_view(), name='user_edit'),
     path('info/comments/', TemplateView.as_view(
         template_name='users/includes/info_comments.html'
@@ -81,4 +82,7 @@ urlpatterns = [
     path('info/posts/', TemplateView.as_view(
         template_name='users/includes/info_posts.html'
     ), name='info_posts'),
+    path('info/likes/', TemplateView.as_view(
+        template_name='users/includes/info_likes.html'
+    ), name='info_likes'),
 ]

@@ -2,14 +2,14 @@
   {% if following %}
     <a
       class="btn btn-lg btn-light"
-      href="{% url 'posts:profile_unfollow' object_list.first.author.username %}" role="button"
+      href="{% url 'posts:profile_unfollow' author.username %}" role="button"
     >
       Отписаться
     </a>
   {% else %}
       <a
         class="btn btn-lg btn-secondary"
-        href="{% url 'posts:profile_follow' object_list.first.author.username %}" role="button"
+        href="{% url 'posts:profile_follow' author.username %}" role="button"
       >
         Подписаться
       </a>

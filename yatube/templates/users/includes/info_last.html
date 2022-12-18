@@ -1,12 +1,83 @@
 {% extends 'users/user_info.html' %}
+{% load humanize %}
 {% block header %}
-Информация
+Последние обновления
 {% endblock %}
 {% block user %}
 
-<p>Здесь когда-нибудь, возможно, что-то будет...</p>
-<p>Но пока я не придумал, чем заполнить, пользуйтесь меню слева :)</p>
+
+
+{% if not last_likes and not last_comments %}
+<div class="card-text">Нету новых уведомлений.</div>
+{% endif %}
+
+
+
+{% if last_likes %}
+<div class="card">
+  <ul class="list-group list-group-flush">
+    <dd class="card-header text-muted">Лайки</dd>
+      {% for like in last_likes|slice:':4' %}
+    <li class="list-group-item"><a class="link-secondary" href="{% url 'posts:profile' like.user %}">
+        {% if like.user.first_name %}{{ like.user.first_name }}{% else %}{{ like.user }}{% endif %}</a>
+        оценил(а) вашу
+        <a class="link-secondary" href="{% url 'posts:post_detail' like.post.id %}">публикацию</a>.
+        <span style="float: right" class="text-muted small">{{ like.pub_date | naturalday }} в {{ like.pub_date|date:'H:m' }}</span>
+    </li>
+      {% endfor %}
+      {% if last_likes.count > 4 %}
+    <li class="list-group-item">
+      Еще {{ last_likes.count | add:'-4' }}
+    </li>
+      {% endif %}
+  </ul>
+</div>
 <br>
-<p>В этом меню вы можете изменить имя, email, пароль.</p>
-<p>Просмотреть ваши последние комментарии и посты, увидеть кто подписан на вас и на кого подписаны вы, в этом же списке можно отменить подписку.</p>
+{% endif %}
+
+
+{% if last_comments %}
+<div class="card">
+  <ul class="list-group list-group-flush">
+    <dd class="card-header text-muted">Комментарии</dd>
+      {% for comment in last_comments|slice:':4' %}
+    <li class="list-group-item"><a class="link-secondary" href="{% url 'posts:profile' comment.author %}">
+        {% if comment.author.first_name %}{{ comment.author.first_name }}{% else %}{{ comment.author }}{% endif %}</a>
+        написал вам
+        <a class="link-secondary" href="{% url 'posts:post_detail' comment.post.id %}">комментарий</a>.
+        <span style="float: right" class="text-muted small">{{ comment.pub_date | naturalday }} в {{ comment.pub_date|date:'H:m' }}</span>
+    </li>
+      {% endfor %}
+      {% if last_comments.count > 4 %}
+    <li class="list-group-item">
+      Еще {{ last_comments.count | add:'-4' }}
+    </li>
+      {% endif %}
+  </ul>
+</div>
+<br>
+{% endif %}
+
+
+{% if last_follows %}
+<div class="card">
+  <ul class="list-group list-group-flush">
+    <dd class="card-header text-muted">Подписчики</dd>
+      {% for follow in last_follows|slice:':4' %}
+    <li class="list-group-item"><a class="link-secondary" href="{% url 'posts:profile' follow.user %}">
+        {% if follow.user.first_name %}{{ follow.user.first_name }}{% else %}{{ follow.user }}{% endif %}</a>
+        подписался на ваши обновления.
+        <span style="float: right" class="text-muted small">{{ follow.pub_date | naturalday }} в {{ follow.pub_date|date:'H:m' }}</span>
+    </li>
+      {% endfor %}
+      {% if last_follows.count > 4 %}
+    <li class="list-group-item">
+      Еще {{ last_follows.count | add:'-4' }}
+    </li>
+      {% endif %}
+  </ul>
+</div>
+{% endif %}
+
+
 {% endblock %}

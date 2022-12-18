@@ -1,3 +1,4 @@
+{% load user_filters %}
 <aside class="col-12 col-md-3">
 <div class="card my-4">
   <dd class="list-group list-group-flush">
@@ -7,6 +8,11 @@
     <li class="list-group-item">
       Дата публикации: {{ post.pub_date|date:"d E Y" }}
     </li>
+    {% if post.edit_date %}
+    <li class="list-group-item">
+      Отредактирован: {{ post.edit_date|date:"d E Y" }}
+    </li>
+    {% endif %}
     {% if post.group %}
     <li class="list-group-item">
       Группа:
@@ -14,7 +20,7 @@
     </li>
     {% endif %}
     <li class="list-group-item">
-      Автор: <a class="link-secondary" href="{% url 'posts:profile' post.author %}">{{ post.author.get_full_name }}</a>
+      Автор: <a class="link-secondary" href="{% url 'posts:profile' post.author %}">{% if post.author.first_name %}{{ post.author.first_name }}{% else %}{{post.author}}{% endif %}</a>
     </li>
     <li class="list-group-item d-flex justify-content-between align-items-center">
       Всего постов автора: {{ post.author.posts.count }}
@@ -30,15 +36,15 @@
   <div class="card my-4">
     <dd class="list-group list-group-flush">
       <li class="card-header">
-        Подписчики ({{ post.author.following.count }}):
+        Подписчики: {{ post.author.following.count }}
       </li>
       {% for i in post.author.following.all %}
       <li class="list-group-item">
         <a class="link-secondary" href="{% url 'posts:profile' i.user %}">
-          {% if not i.user.get_full_name %}
-          {{ i.user.username }}
+          {% if not i.user.first_name %}
+          {{ i.user }}
           {% else %}
-          {{ i.user.get_full_name }}
+          {{ i.user.first_name }}
           {% endif %}
         </a>
       </li>
@@ -46,15 +52,48 @@
     </dd>
   </div>
   {% endif %}
+  {% if post.likes.all != None %}
+  <div class="card my-4">
+    <dd class="list-group list-group-flush">
+      <li class="card-header">
+        Лайки: {{ post.likes.count }}
+      </li>
+      {% for lower in post.likes.all|slice:':5' %}
+      <li class="list-group-item">
+        <a class="link-secondary" href="{% url 'posts:profile' lower.user %}">{%if lower.user.first_name %} {{ lower.user.first_name }}{% else %} {{ lower.user }}{% endif %}</a>
+      </li>
+       {% if post.likes.count > 5 %}
+      <li class="list-group-item">
+        и еще {{ post.likes.count|add:'-5' }}
+      </li>
+      {%endif %}
+      {% endfor %}
+    </dd>
+  </div>
+  {% endif %}
 {% if post.author == user %}
-<a class="btn btn-secondary" href="{% url 'posts:post_edit' post.pk %}">
-  редактировать запись
-</a>
-<a class="btn btn-secondary" href="{% url 'posts:post_delete' post.pk %}">
+   <a class="btn btn-secondary" type="button" data-bs-toggle="modal" data-bs-target="#editPost">
+          Редактировать запись
+        </a>
+        <div class="modal fade" id="editPost" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+          <div class="modal-dialog modal-dialog-centered modal-xl">
+            <div class="modal-content">
+              <div class="modal-header">
+                <h5 class="modal-title" id="exampleModalLabel">Редактирование записи</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Закрыть"></button>
+              </div>
+              <div class="modal-body">
+                {% include 'posts/includes/create_post.html' %}
+              </div>
+            </div>
+          </div>
+        </div>
+<a class="btn btn-secondary" href="{% url 'posts:index' %}">
   Удалить
 </a></p>
 <hr>
 {%endif %}
+{% if user.is_authenticated %}
 {% if request.user != post.author %}
   {% if following %}
     <a class="btn btn-lg btn-light"
@@ -68,6 +107,6 @@
       </a>
    {% endif %}
 {% endif %}
+{% endif %}
 </aside>
-
 

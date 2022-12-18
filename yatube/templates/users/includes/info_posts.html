@@ -1,4 +1,5 @@
 {% extends 'users/user_info.html' %}
+{% load static %}
 {% load thumbnail %}
 {% block header %}
 Последние посты
@@ -8,6 +9,9 @@
 <div class="card mb-3">
   <div class="row g-0">
     <div class="col-md-4">
+      {% if not post.image %}
+      <img src="{% static 'img/noimage.png' %}" class="img-fluid rounded-start" alt="...">
+      {% endif %}
         {% thumbnail post.image "960x670" crop="center" as im %}
       <a href="{% url 'posts:post_detail' post.id %}">
       <img src="{{ im.url }}" class="img-fluid rounded-start" alt="...">

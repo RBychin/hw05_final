@@ -31,13 +31,16 @@
         Контент
     </li>
     <li class="list-group-item">
-      <span class="text-muted">Посты:</span>
-      <a class="link-secondary" href="{% url 'users:info_posts' %}">{{ user.posts.count }}</a>
+      <a class="link-secondary" href="{% url 'users:info_posts' %}">Посты: {{ user.posts.count }}</a>
     </li>
     <li class="list-group-item">
-      <span class="text-muted">Комментарии:</span>
-      <a class="link-secondary" href="{% url 'users:info_comments' %}">{{ user.comments.count }}</a>
+      <a class="link-secondary" href="{% url 'users:info_comments' %}">Комментарии: {{ user.comments.count }}</a>
     </li>
+    {% if user.likes.all != None %}
+      <li class="list-group-item">
+        <a class="link-secondary" href="{% url 'users:info_likes' %}">Избранное: {{ user.likes.count }}</a>
+      </li>
+      {% endif %}
   </dd>
 </div>
   {% if user.following.all %}
@@ -68,7 +71,7 @@
       </li>
       {% for i in user.follower.all %}
       <li class="list-group-item">
-        <a class="link-secondary" href="{% url 'posts:profile' i.user %}">
+        <a class="link-secondary" href="{% url 'posts:profile' i.author %}">
           {% if not i.author.get_full_name %}
           {{ i.author.username }}
           {% else %}
@@ -85,6 +88,7 @@
     {% endif %}
 <hr>
 </aside>
+
 
   <article class="col-12 col-md-9">
     <div class="card my-4">

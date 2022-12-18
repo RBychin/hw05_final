@@ -1,3 +1,4 @@
+{% load embed_video_tags %}
 {% load thumbnail %}
 <div class="row">
   {% if detail_flag == 'True' %}
@@ -5,23 +6,44 @@
   {% endif %}
   <article class="col-12 col-md-9">
     <div class="card my-4">
-      {% if not post.image %}
-      <h7 class="card-header"><b>Пост:</b></h7>
-      {% endif %}
-      {% thumbnail post.image "1920x1080"  upscale=True as im %}
+      {% if post.image or post.video %}
       <h7 class="card-header">
-        <img class="card-img my-2" src="{{ im.url }}">
+        {% thumbnail post.image "1080x381" crop="center" upscale=True as im %}
+        <a type="button" data-bs-toggle="modal" data-bs-target="#exampleModal">
+          <img class="card-img my-2" src="{{ im.url }}">
+          <figcaption class="figure-caption">Что бы открыть изображение - кликните по нему.</figcaption>
+        </a>
+        <div class="modal fade" id="exampleModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+          <div class="modal-dialog modal-dialog-centered modal-xl">
+            <div class="modal-content">
+              <div class="modal-header">
+                <h5 class="modal-title" id="exampleModalLabel">Оригинальное изображение</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Закрыть"></button>
+              </div>
+              <div class="modal-body">
+                <img class="card-img my-2" src="{{ post.image.url }}">
+              </div>
+            </div>
+          </div>
+        </div>
+        {% endthumbnail %}
+
+        {% if post.video %}
+          {% video post.video '100% x 600' %}
+        {% endif %}
       </h7>
-      {% endthumbnail %}
+      {% else %}
+        <h7 class="card-header"><b>Пост:</b></h7>
+      {% endif %}
       <div class="card-body">
-      <p class="blockquote">
-       {{ post.text | linebreaksbr }}
-      </p>
+        <p class="blockquote">
+          {{ post.text | linebreaksbr }}
+        </p>
       </div>
     </div>
     {% if detail_flag == 'True' %}
       {% include 'posts/includes/comments.html' %}
-        {% endif %}
+    {% endif %}
   </article>
 </div>
 <br>

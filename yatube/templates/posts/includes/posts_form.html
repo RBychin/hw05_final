@@ -1,18 +1,21 @@
 {% load thumbnail %}
+{% load humanize %}
+{% load embed_video_tags %}
 <article>
   <div class="card my-4">
   <h7 class="card-header">
   <dd>
-    <span style="float:right;">
+    <div align="right" style="float:right;">
       <font class="figure-caption">
-        {{ post.pub_date }}
+        {{ post.pub_date|naturalday }} в {{ post.pub_date|date:'H:m' }}
+        <p>{% if post.edit_date %}(изменен){% endif %}</p>
       </font>
-    </span>
+    </div>
     {% if author_flag == 'True' %}
     <li>
       Автор:
       <a class="link-secondary" href="{%url 'posts:profile' post.author %}">
-        {% if post.author.get_full_name %}
+        {% if post.author.first_name %}
         {{ post.author.first_name }} {{ post.author.last_name|slice:':1' }}.
         {% else %}
         {{ post.author.username }}
@@ -31,14 +34,24 @@
   </dd>
   </h7>
 <div class="card-body">
-  {% thumbnail post.image "960x339" crop="center" upscale=True as im %}
+  {% thumbnail post.image "1080x381" crop="center" upscale=True as im %}
     <a href="{% url 'posts:post_detail' post.pk %}">
-      <img class="card-img my-2" src="{{ im.url }}">
+      <img class="card-img my-2" src="{{ im.url }}" style="object-fit: contain; width: 100%">
     </a>
-  <br><br>
   {% endthumbnail %}
-  <div class="blockquote">
-{{ post.text|linebreaks }}
+
+
+
+  {% if post.video %}
+  <div class="card-img my-2">{% video post.video '100% x 400' %}</div>
+  {% endif %}
+
+
+  <div class="fw-light">
+    <p>
+      {{ post.text|linebreaks|slice:':500' }}{% if post.text|length > 500 %}... <a class="text-muted" href="{% url 'posts:post_detail' post.id %}">читать далее</a>{% endif %}
+    </p>
+    <span style="float: right">{% include 'posts/includes/likes.html'%}</span>
   </div>
 </div>
 <h7 class="card-footer">
@@ -60,3 +73,4 @@
 </h7>
   </div>
 </article>
+

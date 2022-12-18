@@ -1,0 +1,42 @@
+{% extends 'users/user_info.html' %}
+{% load static %}
+{% load thumbnail %}
+{% block header %}
+Избранное
+{% endblock %}
+{% block user %}
+
+
+{% for like in user.likes.all %}
+
+<div class="card mb-3">
+  <div class="row g-0">
+    <div class="col-md-4">
+      {% if like.post.video %}
+      <img src="{% static 'img/video.png' %}" class="img-fluid rounded-start" alt="...">
+      {% elif not like.post.image %}
+      <img src="{% static 'img/noimage.png' %}" class="img-fluid rounded-start" alt="...">
+      {% else %}
+      {% endif %}
+        {% thumbnail like.post.image "960x670" crop="center" as im %}
+      <a href="{% url 'posts:post_detail' like.post.id %}">
+      <img src="{{ im.url }}" class="img-fluid rounded-start" alt="...">
+        </a>
+        {% endthumbnail %}
+    </div>
+    <div class="col-md-8">
+      <div class="card-body">
+        {% if like.post.group %}<h5 class="card-title">{{ like.post.group }}</h5>{% endif %}
+        <p class="card-text"><a class="text-muted" href="{% url 'posts:post_detail' like.post.id %}">{{ like.post.text|slice:':200' }}</a></p>
+        <p class="card-text"><small class="text-muted">{{ like.post.pub_date }}</small></p>
+          {% if like.post.comments.count > 0 %}
+        <p class="card-text"><small class="text-muted"><a class="text-muted" href="{% url 'posts:post_detail' like.post.id %}">Комментарии: {{ like.post.comments.count }}</a></small></p>
+          {% endif %}
+      </div>
+    </div>
+  </div>
+</div>
+{% endfor %}
+
+
+{% endblock %}

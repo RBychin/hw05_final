@@ -31,7 +31,8 @@ ALLOWED_HOSTS = [
     'localhost',
     '127.0.0.1',
     '[::1]',
-    'testserver',
+    'rbychin.pythonanywhere.com',
+    'www.rbychin.pythonanywhere.com'
 ]
 
 # Application definition
@@ -49,6 +50,8 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'sorl.thumbnail',
     'debug_toolbar',
+    'django.contrib.humanize',
+    'embed_video',
 ]
 
 MIDDLEWARE = [

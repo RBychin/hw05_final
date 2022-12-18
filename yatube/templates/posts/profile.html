@@ -1,16 +1,14 @@
 {% extends 'base.html' %}
-{% block title %} {{ object_list.first.author.get_full_name }} {% endblock %}
+{% block title %} {{ author.get_full_name }} {% endblock %}
 {% block content %}
-{% with page_obj|first as post %}
-        <h1>Все посты пользователя {{ post.author.get_full_name }}
+        <h1>Все посты пользователя {{ author.get_full_name }}
             {% if request.user != author %}
             <span style="float:right;">{% include 'posts/includes/follow_botton.html' %}</span>
             {% endif %}
         </h1>
         <h6>Всего постов: {{ page_obj.paginator.count }} </h6>
-        <h6>Подписок: {{ post.author.follower.count }} </h6>
-        <h6>Подписчиков: {{ post.author.following.count }} </h6>
-{% endwith %}
+        <h6>Подписок: {{ author.follower.count }} </h6>
+        <h6>Подписчиков: {{ author.following.count }} </h6>
           {% for post in page_obj %}
           {% include 'posts/includes/posts_form.html' with group_flag='True' %}
           {% endfor %}
